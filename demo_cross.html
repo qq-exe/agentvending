@@ -53,7 +53,7 @@
   const BASE = location.origin + (isLocal ? '' : location.pathname.replace(/[^/]*$/, ''));
   const SELLER_ORIGIN = location.origin;
   const SELLER_BASE = isLocal ? 'http://127.0.0.1:8899' : BASE;
-  frame.src = SELLER_BASE + '/seller_frame.html';
+  frame.src = SELLER_BASE + '/seller_frame.html?v=' + Date.now();
   document.getElementById('sellerTitle').textContent = `🏪 卖家：AgentVending 售货机（iframe${isLocal ? ' · :8899 跨源' : ' · 同源部署模式'})`;
   let seq = 0; const pending = new Map();
   let sellerReadyResolve = null;
