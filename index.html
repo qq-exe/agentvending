@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentVending — 我的网站是一台智能体自动售货机</title>
+<style>
+  :root { --bg:#0d1117; --card:#161b22; --line:#30363d; --txt:#e6edf3; --dim:#8b949e; --acc:#3fb950; --acc2:#58a6ff; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--txt); font-family:ui-sans-serif,system-ui,"Microsoft YaHei"; line-height:1.6; }
+  .wrap { max-width:880px; margin:0 auto; padding:48px 24px; }
+  h1 { font-size:2.2rem; margin-bottom:8px; }
+  h1 .machine { color:var(--acc); }
+  .tag { color:var(--dim); margin-bottom:32px; }
+  .products { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:32px; }
+  .product { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; }
+  .product h3 { font-size:1rem; margin-bottom:6px; }
+  .price { color:var(--acc); font-weight:700; font-size:1.3rem; }
+  .eta { color:var(--dim); font-size:.85rem; }
+  .slot { background:var(--card); border:1px dashed var(--line); border-radius:12px; padding:20px; text-align:center; color:var(--dim); }
+  .how { margin-top:40px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:24px; }
+  .how h2 { font-size:1.1rem; margin-bottom:12px; color:var(--acc2); }
+  .how ol { margin-left:20px; }
+  .how code { background:#0d1117; border:1px solid var(--line); padding:2px 6px; border-radius:6px; font-size:.85rem; }
+  .cta { display:inline-block; margin-top:16px; background:var(--acc); color:#04260b; font-weight:700; padding:10px 20px; border-radius:10px; text-decoration:none; }
+  footer { margin-top:48px; color:var(--dim); font-size:.85rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>我的网站是一台 <span class="machine">智能体自动售货机</span></h1>
+  <p class="tag">人类看到的是菜单 · AI 智能体看到的是 API —— 两边都能自助成交，无需等我回复。</p>
+
+  <div class="products">
+    <div class="product"><h3>🖥️ 落地页开发</h3><div class="price">$180</div><div class="eta">3 天交付 · 可加急</div></div>
+    <div class="product"><h3>🤖 浏览器自动化机器人</h3><div class="price">$260</div><div class="eta">5 天交付 · 可加急</div></div>
+    <div class="product"><h3>🧠 AI 功能集成</h3><div class="price">$320</div><div class="eta">6 天交付 · 可加急</div></div>
+  </div>
+
+  <div class="slot">
+    🛍️ ← 你的智能体从这里取货<br>
+    <small>buyer agent: discover → quote → order → delivery，全程无需人工</small>
+  </div>
+
+  <div class="how">
+    <h2>给你的智能体的接入方式（30 秒上手）</h2>
+    <ol>
+      <li>读服务发现描述符 <code>GET /.well-known/agent-network.json</code></li>
+      <li>询价 <code>capability("quote").invoke({ sku })</code> —— 价格 24 小时锁定</li>
+      <li>下单 <code>capability("order").invoke({ quote_id, max_budget_usd })</code> —— 自带预算守卫，超预算自动拒绝</li>
+      <li>查进度 <code>capability("status").invoke({ order_id })</code></li>
+    </ol>
+    <a class="cta" href="demo.html">▶ 观看买家智能体实况下单（60 秒）</a>
+  </div>
+
+  <footer>
+    AgentVending 0.2 · Open Agentic Web Challenge 参赛作品 ·
+    结算通道为竞赛演示 mock，生产位预留 Lightning/USDC 或法币通道 ·
+    <a href=".well-known/agent-network.json" style="color:var(--acc2)">查看机器可读描述符</a>
+  </footer>
+</div>
+</body>
+</html>

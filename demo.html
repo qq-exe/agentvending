@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentVending Demo — 买家智能体实况交易</title>
+<style>
+  :root { --bg:#0d1117; --card:#161b22; --line:#30363d; --txt:#e6edf3; --dim:#8b949e; --acc:#3fb950; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--txt); font-family:ui-monospace,"Cascadia Code","Microsoft YaHei",monospace; }
+  .wrap { max-width:900px; margin:0 auto; padding:40px 24px; }
+  h1 { font-size:1.4rem; font-family:ui-sans-serif,system-ui; margin-bottom:4px; }
+  .sub { color:var(--dim); font-family:ui-sans-serif,system-ui; margin-bottom:24px; }
+  #log { background:#010409; border:1px solid var(--line); border-radius:12px; padding:20px; min-height:420px; font-size:.9rem; }
+  .row { padding:4px 0; border-bottom:1px solid #1a2129; display:flex; gap:12px; }
+  .t { color:var(--dim); min-width:48px; }
+  .step { color:var(--acc2); min-width:150px; }
+  .detail { color:var(--txt); flex:1; white-space:pre-wrap; }
+  .ok { color:var(--acc); }
+  button { background:var(--acc); border:0; color:#04260b; font-weight:700; font-size:1rem; padding:12px 28px; border-radius:10px; cursor:pointer; font-family:ui-sans-serif,system-ui; }
+  button:disabled { opacity:.4; cursor:not-allowed; }
+  .pills { display:flex; gap:10px; margin:16px 0; }
+  .pill { border:1px solid var(--line); border-radius:999px; padding:4px 12px; color:var(--dim); font-family:ui-sans-serif,system-ui; font-size:.85rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>买家智能体 vs 卖家售货机 —— 实况交易</h1>
+  <p class="sub">页面内置的买家智能体将独立完成：服务发现 → 询价 → 预算守卫 → 下单 → 进度查询。人类全程不参与。</p>
+  <div class="pills">
+    <span class="pill">预算上限 $200</span>
+    <span class="pill">目标 SKU: browser-automation ($260 → 触发谈判)</span>
+    <span class="pill">transport: same-origin fetch（跨站点版用 postMessage）</span>
+  </div>
+  <button id="run">▶ 运行买家智能体</button>
+  <div id="log" style="margin-top:20px"><div class="row detail" style="color:var(--dim)">等待运行…</div></div>
+</div>
+<script type="module">
+  import { AgentVendingAPI } from './js/agent-api.js';
+  import { runBuyerAgent } from './js/buyer-agent.js';
+
+  const logEl = document.getElementById('log');
+  const btn = document.getElementById('run');
+  function onLog({ t, step, detail }) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `<span class="t">+${t}</span><span class="step">${step}</span><span class="detail ${/✅/.test(step) ? 'ok' : ''}">${detail}</span>`;
+    logEl.appendChild(row);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    logEl.innerHTML = '';
+    // 演示预算故意低于 browser-automation 报价 → 展示预算守卫与自动谈判
+    const api = new AgentVendingAPI(location.origin);
+    await runBuyerAgent(api, { sku: 'browser-automation', budget: 200, onLog });
+    btn.disabled = false;
+    btn.textContent = '↻ 再跑一次';
+  });
+</script>
+</body>
+</html>

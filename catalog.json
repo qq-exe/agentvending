@@ -1,0 +1,10 @@
+{
+  "updated": "2026-11-17",
+  "currency": "USD",
+  "skus": [
+    { "id": "landing-page", "name": "Landing Page Build", "base_price": 180, "delivery_days": 3, "rush_multiplier": 1.5, "deliverables": ["responsive page", "deploy link", "source repo"] },
+    { "id": "browser-automation", "name": "Browser Automation Bot", "base_price": 260, "delivery_days": 5, "rush_multiplier": 1.5, "deliverables": ["bot source", "run guide", "1-week fixes"] },
+    { "id": "ai-integration", "name": "AI Feature Integration", "base_price": 320, "delivery_days": 6, "rush_multiplier": 1.5, "deliverables": ["API wiring", "prompt pack", "eval script"] }
+  ],
+  "capacity": { "max_concurrent_orders": 3 }
+}

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://agentic-web.org/schemas/agent-network-v0.2.json",
+  "name": "AgentVending — Quanquan Wu's Service Vending Machine",
+  "id": "agentvending://wu-quanquan",
+  "version": "0.2.0",
+  "description": "A self-service agent storefront: buyer agents discover services, get instant quotes, place orders and receive deliverables without human interaction.",
+  "spec_profile": "minimum-browser",
+  "owner": {
+    "type": "individual",
+    "name": "Quanquan Wu",
+    "contact_human": "mailto:785807791@qq.com"
+  },
+  "runtime": {
+    "kind": "browser-static",
+    "entry": "./js/agent-api.js",
+    "transport": ["same-origin-fetch", "cross-origin-postMessage"],
+    "runtime_interface": "./js/agent-api.js#AgentVendingAPI"
+  },
+  "capabilities": [
+    {
+      "id": "quote",
+      "name": "Get instant quote",
+      "description": "Returns a firm price and turnaround for a service SKU, grounded in the published price table. No negotiation needed.",
+      "grounding": "./catalog.json",
+      "input_schema": { "type": "object", "required": ["sku"], "properties": { "sku": { "type": "string", "enum": ["landing-page", "browser-automation", "ai-integration"] }, "rush": { "type": "boolean", "default": false } } },
+      "output_schema": { "type": "object", "required": ["price_usd", "delivery_days", "quote_id"], "properties": { "price_usd": { "type": "number" }, "delivery_days": { "type": "integer" }, "quote_id": { "type": "string" }, "valid_until": { "type": "string", "format": "date-time" } } },
+      "side_effects": "none",
+      "auth": "open"
+    },
+    {
+      "id": "order",
+      "name": "Place order",
+      "description": "Places an order against a valid quote_id. Returns order id and a delivery manifest URL. Budget guard: refuses orders whose quote exceeds buyer-declared max_budget.",
+      "grounding": "./catalog.json",
+      "input_schema": { "type": "object", "required": ["quote_id", "buyer_agent_id", "max_budget_usd", "brief_url"], "properties": { "brief_url": { "type": "string", "format": "uri" }, "max_budget_usd": { "type": "number" } } },
+      "output_schema": { "type": "object", "required": ["order_id", "status", "delivery_url"], "properties": { "order_id": { "type": "string" }, "status": { "type": "string", "enum": ["accepted", "rejected-budget", "rejected-invalid-quote"] }, "delivery_url": { "type": "string", "format": "uri" } } },
+      "side_effects": "creates-order-record",
+      "auth": "open",
+      "rate_limit": "10/hour per buyer_agent_id"
+    },
+    {
+      "id": "status",
+      "name": "Check order status",
+      "description": "Read-only lookup of an order by id.",
+      "input_schema": { "type": "object", "required": ["order_id"] },
+      "output_schema": { "type": "object", "required": ["order_id", "status", "progress_pct"] },
+      "side_effects": "none",
+      "auth": "open"
+    }
+  ],
+  "discovery": {
+    "well_known": "/.well-known/agent-network.json",
+    "advertises": ["quote", "order", "status"],
+    "accepts_inbound_agents": true,
+    "trust": {
+      "model": "capability-scoped",
+      "external_access": "read-only discovery + quoted-rate-limited actions; no credentials exposed; all state public and inspectable"
+    }
+  },
+  "pricing_currency": "USD (mock settlement in demo; production slot for Lightning/USDC or fiat rail)",
+  "honest_limits": [
+    "Settlement is mocked in this contest build; the interface is the deliverable, not the payment rail.",
+    "Quotes are grounded in catalog.json and immutable for 24h.",
+    "Order capacity: 3 concurrent orders to keep delivery honest."
+  ]
+}
