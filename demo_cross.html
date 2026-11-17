@@ -54,15 +54,24 @@
   frame.src = SELLER_ORIGIN + '/seller_frame.html';
   document.getElementById('sellerTitle').textContent = `🏪 卖家：AgentVending 售货机（iframe${isLocal ? ' · :8899 跨源' : ' · 同源部署模式'})`;
   let seq = 0; const pending = new Map();
+  let sellerReadyResolve = null;
+  const sellerReady = new Promise(r => { sellerReadyResolve = r; });
   window.addEventListener('message', (ev) => {
     if (ev.origin !== SELLER_ORIGIN) return;
-    const { jsonrpc, id, result } = ev.data || {};
+    const { jsonrpc, id, result, ready } = ev.data || {};
+    if (jsonrpc === 'agentvending-0.2' && ready && sellerReadyResolve) { sellerReadyResolve(); sellerReadyResolve = null; }
     if (jsonrpc === 'agentvending-0.2' && pending.has(id)) { pending.get(id)(result); pending.delete(id); }
   });
-  const call = (method, params) => new Promise((resolve) => {
+  const call = (method, params, retries = 0) => new Promise((resolve) => {
     const id = ++seq;
     pending.set(id, resolve);
     frame.contentWindow.postMessage({ jsonrpc: 'agentvending-0.2', id, method, params }, SELLER_ORIGIN);
+    if (retries > 0) setTimeout(async () => {
+      if (pending.has(id)) { // 无响应则重发
+        pending.delete(id);
+        resolve(await call(method, params, retries - 1));
+      }
+    }, 1200);
   });
 
   btn.addEventListener('click', async () => {
@@ -72,9 +81,9 @@
     const log = (step, detail) => onLog({ t: ((Date.now() - t0) / 1000).toFixed(1) + 's', step, detail });
 
     log('handshake', '等待卖家帧就绪（seller_frame.html 加载 AgentVendingAPI）…');
-    await new Promise(r => frame.onload ? null : setTimeout(r, 800));
+    await Promise.race([sellerReady, new Promise(r => setTimeout(r, 6000))]);
     log('discover', 'POST postMessage → discovery 查询');
-    const desc = await call('discover', {});
+    const desc = await call('discover', {}, 3);
     log('discovered', `seller="${(desc.name || '').slice(0, 44)}", capabilities=[${(desc.capabilities || []).map(c => c.id).join(', ')}]`);
 
     log('quote', 'asking sku=browser-automation');
