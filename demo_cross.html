@@ -50,8 +50,10 @@
   // GitHub Pages 等单 origin 部署：卖家帧退化为同源（消息协议照常演示，控制台会注明）
   const frame = document.getElementById('sellerFrame');
   const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
-  const SELLER_ORIGIN = isLocal ? 'http://127.0.0.1:8899' : location.origin;
-  frame.src = SELLER_ORIGIN + '/seller_frame.html';
+  const BASE = location.origin + (isLocal ? '' : location.pathname.replace(/[^/]*$/, ''));
+  const SELLER_ORIGIN = location.origin;
+  const SELLER_BASE = isLocal ? 'http://127.0.0.1:8899' : BASE;
+  frame.src = SELLER_BASE + '/seller_frame.html';
   document.getElementById('sellerTitle').textContent = `🏪 卖家：AgentVending 售货机（iframe${isLocal ? ' · :8899 跨源' : ' · 同源部署模式'})`;
   let seq = 0; const pending = new Map();
   let sellerReadyResolve = null;

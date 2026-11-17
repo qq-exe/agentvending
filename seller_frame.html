@@ -13,8 +13,9 @@ h1{font-size:18px}.p{background:#f5f7fa;border:1px solid #dde3ea;border-radius:1
 <div class="p" style="border-style:dashed">🛍️ 智能体取货口：jsonrpc agentvending-0.2 · discover/quote/order/status</div>
 <script type="module">
   import { AgentVendingAPI } from './js/agent-api.js?v=2';
-  // 卖家帧自己的 origin 是 127.0.0.1:8900 —— 资源同源拉取，能力经 postMessage 暴露给父页
-  const api = new AgentVendingAPI(location.origin);
+  // 卖家帧自己的 origin 上可能带子路径（GitHub Pages 项目页）——统一算出资源根
+  const BASE = location.origin + location.pathname.replace(/[^/]*$/, '');
+  const api = new AgentVendingAPI(BASE);
   await api.discover().catch(() => {});
   api.serveViaPostMessage('*');
   window.parent.postMessage({ jsonrpc: 'agentvending-0.2', ready: true }, '*');

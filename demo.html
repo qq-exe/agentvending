@@ -53,7 +53,8 @@
     btn.disabled = true;
     logEl.innerHTML = '';
     // 演示预算故意低于 browser-automation 报价 → 展示预算守卫与自动谈判
-    const api = new AgentVendingAPI(location.origin);
+    const BASE = location.origin + location.pathname.replace(/[^/]*$/, '');
+    const api = new AgentVendingAPI(BASE);
     await runBuyerAgent(api, { sku: 'browser-automation', budget: 200, onLog });
     btn.disabled = false;
     btn.textContent = '↻ 再跑一次';
