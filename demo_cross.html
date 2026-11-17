@@ -28,7 +28,7 @@
   <h1>跨站点双智能体交易（postMessage 通道）</h1>
   <p class="sub">左：卖家售货机（独立 origin 帧内运行 AgentVendingAPI.serveViaPostMessage） · 右：买家智能体（另一"站点"的逻辑页）。两个窗口互不共享 JS 上下文，只通过结构化消息通信——复现真实跨站点智能体交易。</p>
   <div class="panes">
-    <div class="pane"><h2>🏪 卖家：AgentVending 售货机（iframe · :8899）</h2><iframe id="sellerFrame" src="http://127.0.0.1:8899/seller_frame.html"></iframe></div>
+    <div class="pane"><h2 id="sellerTitle">🏪 卖家：AgentVending 售货机（iframe）</h2><iframe id="sellerFrame"></iframe></div>
     <div class="pane"><h2>🤖 买家智能体交易日志</h2><div id="buyerLog"><div class="row"><span class="t">--</span><span class="s">等待运行</span></div></div></div>
   </div>
   <button id="run">▶ 运行跨站点买家智能体</button>
@@ -46,9 +46,13 @@
   }
 
   // 买家侧客户端（与 agent-api.js 的 AgentVendingAPI.client 相同协议）
-  // 买家页跑在 :8900，卖家帧跑在 :8899 —— 真正的两个 origin，跨源消息才有效
+  // 本地：买家 :8900 / 卖家 :8899（真·双 origin）
+  // GitHub Pages 等单 origin 部署：卖家帧退化为同源（消息协议照常演示，控制台会注明）
   const frame = document.getElementById('sellerFrame');
-  const SELLER_ORIGIN = 'http://127.0.0.1:8899';
+  const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+  const SELLER_ORIGIN = isLocal ? 'http://127.0.0.1:8899' : location.origin;
+  frame.src = SELLER_ORIGIN + '/seller_frame.html';
+  document.getElementById('sellerTitle').textContent = `🏪 卖家：AgentVending 售货机（iframe${isLocal ? ' · :8899 跨源' : ' · 同源部署模式'})`;
   let seq = 0; const pending = new Map();
   window.addEventListener('message', (ev) => {
     if (ev.origin !== SELLER_ORIGIN) return;
