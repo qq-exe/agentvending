@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AgentVending — 跨站点双智能体交易演示</title>
+<title>AgentVending — Cross-Site Two-Agent Trading Demo</title>
 <style>
   :root { --bg:#0d1117; --card:#161b22; --line:#30363d; --txt:#e6edf3; --dim:#8b949e; --acc:#3fb950; --acc2:#58a6ff; }
   * { box-sizing:border-box; margin:0; padding:0; }
@@ -25,14 +25,14 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>跨站点双智能体交易（postMessage 通道）</h1>
-  <p class="sub">左：卖家售货机（独立 origin 帧内运行 AgentVendingAPI.serveViaPostMessage） · 右：买家智能体（另一"站点"的逻辑页）。两个窗口互不共享 JS 上下文，只通过结构化消息通信——复现真实跨站点智能体交易。</p>
+  <h1>Cross-Site Two-Agent Trading (postMessage Channel)</h1>
+  <p class="sub">Left: the seller vending machine (AgentVendingAPI.serveViaPostMessage running inside an independent-origin frame) · Right: the buyer agent (a logic page of another "site"). The two windows share no JS context and communicate only via structured messages — replicating a real cross-site agent transaction.</p>
   <div class="panes">
-    <div class="pane"><h2 id="sellerTitle">🏪 卖家：AgentVending 售货机（iframe）</h2><iframe id="sellerFrame"></iframe></div>
-    <div class="pane"><h2>🤖 买家智能体交易日志</h2><div id="buyerLog"><div class="row"><span class="t">--</span><span class="s">等待运行</span></div></div></div>
+    <div class="pane"><h2 id="sellerTitle">🏪 Seller: AgentVending Vending Machine (iframe)</h2><iframe id="sellerFrame"></iframe></div>
+    <div class="pane"><h2>🤖 Buyer Agent Transaction Log</h2><div id="buyerLog"><div class="row"><span class="t">--</span><span class="s">Waiting to run</span></div></div></div>
   </div>
-  <button id="run">▶ 运行跨站点买家智能体</button>
-  <p class="note">预算 $200，目标 SKU browser-automation（$260）→ 触发预算守卫与自动谈判，与单站点演示相同剧本，但走 postMessage 跨帧通道。</p>
+  <button id="run">▶ Run the Cross-Site Buyer Agent</button>
+  <p class="note">Budget $200, target SKU browser-automation ($260) → triggers the budget guard and auto-negotiation, same script as the single-site demo but over the postMessage cross-frame channel.</p>
 </div>
 <script type="module">
   const logEl = document.getElementById('buyerLog');
@@ -45,16 +45,16 @@
     logEl.scrollTop = logEl.scrollHeight;
   }
 
-  // 买家侧客户端（与 agent-api.js 的 AgentVendingAPI.client 相同协议）
-  // 本地：买家 :8900 / 卖家 :8899（真·双 origin）
-  // GitHub Pages 等单 origin 部署：卖家帧退化为同源（消息协议照常演示，控制台会注明）
+  // Buyer-side client (same protocol as AgentVendingAPI.client in agent-api.js)
+  // Local: buyer :8900 / seller :8899 (true dual origin)
+  // Single-origin deployments like GitHub Pages: the seller frame falls back to same-origin (the message protocol demos as usual; the console will note it)
   const frame = document.getElementById('sellerFrame');
   const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
   const BASE = location.origin + (isLocal ? '' : location.pathname.replace(/[^/]*$/, ''));
-  const SELLER_ORIGIN = location.origin;
+  const SELLER_ORIGIN = isLocal ? 'http://127.0.0.1:8899' : location.origin;
   const SELLER_BASE = isLocal ? 'http://127.0.0.1:8899' : BASE;
   frame.src = SELLER_BASE + '/seller_frame.html?v=' + Date.now();
-  document.getElementById('sellerTitle').textContent = `🏪 卖家：AgentVending 售货机（iframe${isLocal ? ' · :8899 跨源' : ' · 同源部署模式'})`;
+  document.getElementById('sellerTitle').textContent = `🏪 Seller: AgentVending Vending Machine (iframe${isLocal ? ' · :8899 cross-origin' : ' · same-origin deployment mode'})`;
   let seq = 0; const pending = new Map();
   let sellerReadyResolve = null;
   const sellerReady = new Promise(r => { sellerReadyResolve = r; });
@@ -69,7 +69,7 @@
     pending.set(id, resolve);
     frame.contentWindow.postMessage({ jsonrpc: 'agentvending-0.2', id, method, params }, SELLER_ORIGIN);
     if (retries > 0) setTimeout(async () => {
-      if (pending.has(id)) { // 无响应则重发
+      if (pending.has(id)) { // re-send if no response
         pending.delete(id);
         resolve(await call(method, params, retries - 1));
       }
@@ -82,9 +82,9 @@
     const t0 = Date.now();
     const log = (step, detail) => onLog({ t: ((Date.now() - t0) / 1000).toFixed(1) + 's', step, detail });
 
-    log('handshake', '等待卖家帧就绪（seller_frame.html 加载 AgentVendingAPI）…');
+    log('handshake', 'Waiting for the seller frame to be ready (seller_frame.html loading AgentVendingAPI)…');
     await Promise.race([sellerReady, new Promise(r => setTimeout(r, 6000))]);
-    log('discover', 'POST postMessage → discovery 查询');
+    log('discover', 'POST postMessage → discovery query');
     const desc = await call('discover', {}, 3);
     log('discovered', `seller="${(desc.name || '').slice(0, 44)}", capabilities=[${(desc.capabilities || []).map(c => c.id).join(', ')}]`);
 
@@ -107,7 +107,7 @@
     }
     log('done', `total ${(Date.now() - t0) / 1000}s — cross-origin deal, zero human input`);
     btn.disabled = false;
-    btn.textContent = '↻ 再跑一次';
+    btn.textContent = '↻ Run Again';
   });
 </script>
 </body>

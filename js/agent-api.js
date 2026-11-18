@@ -1,10 +1,10 @@
 /**
- * AgentVendingAPI — 浏览器端智能体运行时（Open Agentic Web Challenge）
+ * AgentVendingAPI — In-browser agent runtime (Open Agentic Web Challenge)
  *
- * 同源 fetch 与跨域 postMessage 双通道。每个 capability 都是 grounded
- * （锚定 catalog.json 的价格表）且有副作用声明与限流。
+ * Dual channels: same-origin fetch and cross-origin postMessage. Every capability is
+ * grounded (anchored to the catalog.json price table) with side-effect declarations and rate limiting.
  *
- * 用法（跨站点买家智能体）:
+ * Usage (cross-site buyer agent):
  *   const api = new AgentVendingAPI('https://seller.example');
  *   const q  = await api.capability('quote').invoke({ sku: 'landing-page' });
  *   const o  = await api.capability('order').invoke({ quote_id: q.quote_id, ... });
@@ -12,13 +12,13 @@
 export class AgentVendingAPI {
   constructor(origin) {
     this.origin = origin.replace(/\/$/, '');
-    this._orders = new Map();      // order_id -> record（demo 内存态）
+    this._orders = new Map();      // order_id -> record (demo in-memory state)
     this._quotes = new Map();      // quote_id -> record
-    this._reqCount = new Map();    // buyer_agent_id -> timestamps（限流）
+    this._reqCount = new Map();    // buyer_agent_id -> timestamps (rate limiting)
     this._seq = 0;
   }
 
-  /** 能力发现：拉取并校验 /.well-known/agent-network.json */
+  /** Capability discovery: fetch and validate /.well-known/agent-network.json */
   async discover() {
     const res = await fetch(`${this.origin}/.well-known/agent-network.json`);
     if (!res.ok) throw new Error(`discovery failed: HTTP ${res.status}`);
@@ -27,7 +27,7 @@ export class AgentVendingAPI {
     return desc;
   }
 
-  /** 取某个 capability 的调用句柄 */
+  /** Get the invocation handle for a capability */
   capability(id) {
     const cap = this._descriptor?.capabilities?.find(c => c.id === id);
     if (!cap) throw new Error(`capability '${id}' not advertised`);
@@ -82,7 +82,7 @@ export class AgentVendingAPI {
     return { order_id, status: o.status, progress_pct: o.progress_pct };
   }
 
-  /** 跨站点通道：以 postMessage 暴露同一套能力（iframe/弹窗场景） */
+  /** Cross-site channel: expose the same capabilities via postMessage (iframe/popup scenarios) */
   serveViaPostMessage(targetOrigin = '*') {
     window.addEventListener('message', async (ev) => {
       const { jsonrpc, id, method, params } = ev.data || {};
@@ -94,7 +94,7 @@ export class AgentVendingAPI {
     });
   }
 
-  /** 买家侧客户端：向 seller iframe 发起调用 */
+  /** Buyer-side client: make calls to a seller iframe */
   static client(iframeEl, targetOrigin) {
     let seq = 0; const pending = new Map();
     window.addEventListener('message', (ev) => {

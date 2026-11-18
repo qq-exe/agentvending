@@ -1,7 +1,7 @@
 /**
- * buyer-agent.js — 内置买家智能体（演示用）
- * 模拟一个真实的外部买家智能体：发现 → 询价 → 预算守卫 → 下单 → 查进度。
- * 所有决策日志都会打到 onLog 回调，demo 页面实时显示。
+ * buyer-agent.js — Built-in buyer agent (for the demo)
+ * Simulates a real external buyer agent: discover → quote → budget guard → order → status check.
+ * All decision logs go to the onLog callback and display live on the demo page.
  */
 export async function runBuyerAgent(sellerApi, { sku = 'browser-automation', budget = 200, onLog = console.log } = {}) {
   const t0 = Date.now();

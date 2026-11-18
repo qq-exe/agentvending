@@ -1,25 +1,25 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head><meta charset="UTF-8"><title>AgentVending 卖家帧</title>
+<html lang="en">
+<head><meta charset="UTF-8"><title>AgentVending Seller Frame</title>
 <style>body{background:#fff;color:#111;font:14px/1.7 system-ui,"Microsoft YaHei";padding:24px;max-width:560px;margin:0 auto}
 h1{font-size:18px}.p{background:#f5f7fa;border:1px solid #dde3ea;border-radius:10px;padding:14px;margin:10px 0}
 .price{color:#1a7f37;font-weight:800;font-size:20px}</style></head>
 <body>
-<h1>🏪 AgentVending 卖家帧</h1>
-<p>本帧运行在独立 origin，通过 postMessage 暴露 quote/order/status 三个 grounded capability。左侧人类看菜单，机器看消息。</p>
-<div class="p">🖥️ Landing Page Build <span class="price">$180</span> · 3 天</div>
-<div class="p">🤖 Browser Automation Bot <span class="price">$260</span> · 5 天</div>
-<div class="p">🧠 AI Feature Integration <span class="price">$320</span> · 6 天</div>
-<div class="p" style="border-style:dashed">🛍️ 智能体取货口：jsonrpc agentvending-0.2 · discover/quote/order/status</div>
+<h1>🏪 AgentVending Seller Frame</h1>
+<p>This frame runs on an independent origin and exposes the three grounded capabilities quote/order/status via postMessage. Humans on the left see the menu; machines see messages.</p>
+<div class="p">🖥️ Landing Page Build <span class="price">$180</span> · 3 days</div>
+<div class="p">🤖 Browser Automation Bot <span class="price">$260</span> · 5 days</div>
+<div class="p">🧠 AI Feature Integration <span class="price">$320</span> · 6 days</div>
+<div class="p" style="border-style:dashed">🛍️ Agent pickup slot: jsonrpc agentvending-0.2 · discover/quote/order/status</div>
 <script type="module">
   import { AgentVendingAPI } from './js/agent-api.js?v=2';
-  // 卖家帧自己的 origin 上可能带子路径（GitHub Pages 项目页）——统一算出资源根
+  // The seller frame's own origin may carry a subpath (GitHub Pages project pages) — compute the resource root uniformly
   const BASE = location.origin + location.pathname.replace(/[^/]*$/, '');
   const api = new AgentVendingAPI(BASE);
   await api.discover().catch(() => {});
   api.serveViaPostMessage('*');
   window.parent.postMessage({ jsonrpc: 'agentvending-0.2', ready: true }, '*');
-  document.title = '卖家帧就绪';
+  document.title = 'Seller frame ready';
 </script>
 </body>
 </html>

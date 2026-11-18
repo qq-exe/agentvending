@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AgentVending Demo — 买家智能体实况交易</title>
+<title>AgentVending Demo — Buyer Agent Live Trading</title>
 <style>
   :root { --bg:#0d1117; --card:#161b22; --line:#30363d; --txt:#e6edf3; --dim:#8b949e; --acc:#3fb950; }
   * { box-sizing:border-box; margin:0; padding:0; }
@@ -25,15 +25,15 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>买家智能体 vs 卖家售货机 —— 实况交易</h1>
-  <p class="sub">页面内置的买家智能体将独立完成：服务发现 → 询价 → 预算守卫 → 下单 → 进度查询。人类全程不参与。</p>
+  <h1>Buyer Agent vs. Seller Vending Machine — Live Trading</h1>
+  <p class="sub">The buyer agent built into this page independently completes: service discovery → quote → budget guard → order → status check. No human involvement at any point.</p>
   <div class="pills">
-    <span class="pill">预算上限 $200</span>
-    <span class="pill">目标 SKU: browser-automation ($260 → 触发谈判)</span>
-    <span class="pill">transport: same-origin fetch（跨站点版用 postMessage）</span>
+    <span class="pill">Budget cap $200</span>
+    <span class="pill">Target SKU: browser-automation ($260 → triggers negotiation)</span>
+    <span class="pill">transport: same-origin fetch (the cross-site version uses postMessage)</span>
   </div>
-  <button id="run">▶ 运行买家智能体</button>
-  <div id="log" style="margin-top:20px"><div class="row detail" style="color:var(--dim)">等待运行…</div></div>
+  <button id="run">▶ Run the Buyer Agent</button>
+  <div id="log" style="margin-top:20px"><div class="row detail" style="color:var(--dim)">Waiting to run…</div></div>
 </div>
 <script type="module">
   import { AgentVendingAPI } from './js/agent-api.js';
@@ -52,12 +52,12 @@
   btn.addEventListener('click', async () => {
     btn.disabled = true;
     logEl.innerHTML = '';
-    // 演示预算故意低于 browser-automation 报价 → 展示预算守卫与自动谈判
+    // Budget deliberately set below the browser-automation quote → showcases the budget guard and auto-negotiation
     const BASE = location.origin + location.pathname.replace(/[^/]*$/, '');
     const api = new AgentVendingAPI(BASE);
     await runBuyerAgent(api, { sku: 'browser-automation', budget: 200, onLog });
     btn.disabled = false;
-    btn.textContent = '↻ 再跑一次';
+    btn.textContent = '↻ Run Again';
   });
 </script>
 </body>
